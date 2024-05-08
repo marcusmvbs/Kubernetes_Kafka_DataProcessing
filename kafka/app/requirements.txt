@@ -1,0 +1,13 @@
+python-dotenv
+numpy
+scipy
+matplotlib
+scikit-learn
+pandas
+ipython 
+jupyter-console
+confluent-kafka
+kafka-python
+requests
+beautifulsoup4
+python-dotenv

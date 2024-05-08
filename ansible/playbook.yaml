@@ -1,0 +1,66 @@
+- name: Kind dependencies, Helm install, cluster config
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Update Container Packages
+      apt:
+        update_cache: yes
+
+    - name: Download Kind binary # v0.21.0
+      get_url:
+        url: "https://github.com/kubernetes-sigs/kind/releases/download/v0.21.0/kind-linux-amd64"
+        dest: "/usr/local/bin/kind"
+        mode: '0755'
+
+    - name: Download kubectl binary # v1.29.1
+      get_url:
+        url: "https://storage.googleapis.com/kubernetes-release/release/v1.29.1/bin/linux/amd64/kubectl"
+        dest: "/usr/local/bin/kubectl"
+        mode: '0755'
+      
+    - name: Download Helm binary
+      get_url:
+        url: "https://get.helm.sh/helm-v3.14.2-linux-amd64.tar.gz"
+        dest: "/tmp/helm.tar.gz"
+    - name: Extract Helm binary
+      ansible.builtin.unarchive:
+        src: "/tmp/helm.tar.gz"
+        dest: "/tmp/"
+    - name: Move Helm binary
+      ansible.builtin.copy:
+        src: "/tmp/linux-amd64/helm"
+        dest: "/usr/local/bin/helm"
+        mode: '0755'
+
+    - name: Kubernetes Dashboard Helm Repo
+      ansible.builtin.command: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+    - name: Bitnami Helm Repo
+      ansible.builtin.command: helm repo add bitnami https://charts.bitnami.com/bitnami
+    - name: Prometheus Helm Repo
+      ansible.builtin.command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    - name: Airflow Helm Repo
+      ansible.builtin.command: helm repo add apache-airflow https://airflow.apache.org
+    - name: Search Helm Charts
+      ansible.builtin.command: helm search repo
+    - name: Update Helm Repositories
+      ansible.builtin.command: helm repo update
+
+    - name: Create Kind cluster
+      ansible.builtin.command: kind create cluster --config=../kind/kind-config.yaml
+
+    - name: Create namespaces
+      ansible.builtin.command: kubectl create namespace {{ item }}
+      loop:
+        - kubernetes-dashboard
+        - kafka
+        - airflow
+
+    # - name: Helm installing kubernetes-dashboard...
+    #   ansible.builtin.command: helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --version 7.1.1 --namespace kubernetes-dashboard
+    # - name: Helm installing kafka (kraft mode)...
+    #   ansible.builtin.command: helm install kafka bitnami/kafka --version 28.0.4 --namespace kafka
+    - name: Helm installing apache-airflow...
+      ansible.builtin.command: helm upgrade --install airflow apache-airflow/airflow --namespace airflow
+
+    # - name: Sleep (DEBUG)...
+    #   ansible.builtin.command: sleep 15

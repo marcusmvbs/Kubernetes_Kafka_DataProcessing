@@ -1,0 +1,13 @@
+ansible
+pandas
+pyspark
+matplotlib
+numpy
+scipy
+ipython 
+scikit-learn 
+requests
+jupyter-console 
+ipython-sql 
+beautifulsoup4 
+sqlalchemy

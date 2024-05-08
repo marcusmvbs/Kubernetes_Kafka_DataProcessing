@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-app
+  namespace: kafka
+spec:
+  containers:
+  - name: kafka-app
+    image: 21121953/kafka-app
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+    - containerPort: 80
